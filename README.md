@@ -114,7 +114,7 @@ Stagehand is best when you have an API key for an LLM provider and Browserbase c
 
 ```bash
 cp .env.example .env
-nano .env # Edit the .env file to add API keys
+nano .env # Edit the .env file to add API keys 
 ```
 
 ## Contributing

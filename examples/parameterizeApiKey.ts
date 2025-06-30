@@ -1,6 +1,8 @@
 import { Stagehand } from "@browserbasehq/stagehand";
-import { StagehandConfig } from "./stagehand.config";
+import StagehandConfig from "@/stagehand.config";
 import { z } from "zod";
+
+console.log(StagehandConfig);
 
 /**
  * This example shows how to parameterize the API key for the LLM provider.
@@ -31,6 +33,7 @@ async function example() {
     }),
   });
   console.log(`Our favorite contributor is ${contributor.username}`);
+  await stagehand.close();
 }
 
 (async () => {
