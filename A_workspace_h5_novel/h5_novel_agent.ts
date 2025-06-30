@@ -31,11 +31,12 @@ async function openH5NovelPage() {
 
     // 方案1：用自然语言指令让 agent 自动完成套餐点击和支付
     const INSTRUCTION =
-      "依次点击所有 data-e2e 属性为 payment-pop-item开头 的套餐格子，并为每个套餐点击'立即支付'按钮";
+      //"依次点击所有 data-e2e 属性为 payment-pop-item开头 的套餐格子，并为每个套餐点击'立即支付'按钮";
+      "获取所有 data-e2e 属性为 payment-pop-item开头 的套餐格子，并打印出所有格子的data-e2e属性";
     console.log("开始执行agent任务:", INSTRUCTION);
     const result = await agent.execute({
       instruction: INSTRUCTION,
-      maxSteps: 20,
+      maxSteps: 5,
     });
 
     console.log("****result:", result);
