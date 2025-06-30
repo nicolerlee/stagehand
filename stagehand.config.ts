@@ -17,8 +17,7 @@ const StagehandConfig: ConstructorParams = {
   // },
 
   //   LLM configuration -  claude
-  // modelName: "claude-3-5-sonnet-latest",
-  modelName: "claude-sonnet-4-20250514",
+  modelName: "claude-3-7-sonnet-20250219",
   modelClientOptions: {
     apiKey: process.env.AIHUBMIX_API_KEY,
     baseURL: "https://aihubmix.com",
