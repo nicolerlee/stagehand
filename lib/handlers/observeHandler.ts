@@ -168,7 +168,12 @@ export class StagehandObserveHandler {
           },
         });
 
-        const lookUpIndex = elementId as EncodedId;
+        let elementId2 = elementId;
+        // 如果elementId不是以"0-"开头，则在前面添加"0-"前缀
+        if (!elementId2.startsWith("0-")) {
+          elementId2 = `0-${elementId}`;
+        }
+        const lookUpIndex = elementId2 as EncodedId;
         const xpath = combinedXpathMap[lookUpIndex];
 
         const trimmedXpath = trimTrailingTextNode(xpath);
