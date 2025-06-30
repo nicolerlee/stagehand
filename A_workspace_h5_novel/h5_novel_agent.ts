@@ -30,13 +30,28 @@ async function openH5NovelPage() {
     console.log("Page is ready for interaction");
 
     // 方案1：用自然语言指令让 agent 自动完成套餐点击和支付
-    const INSTRUCTION =
-      //"依次点击所有 data-e2e 属性为 payment-pop-item开头 的套餐格子，并为每个套餐点击'立即支付'按钮";
-      "获取所有 data-e2e 属性为 payment-pop-item开头 的套餐格子，并打印出所有格子的data-e2e属性";
+    const INSTRUCTION = `
+    请仔细分析页面上的付费弹框，我需要你：
+    1. 识别所有的套餐选项（包括连续包月、季卡会员、年卡会员、以及币充值选项）
+    2. 依次点击每个套餐格子，观察每次点击后价格和支付按钮的变化
+    3. 对于每个套餐选项，点击后等待1秒钟，然后记录当前选中的套餐信息
+    4. 不要点击"立即支付"按钮，只点击套餐选择
+    5. 完成所有套餐的点击测试后，汇总所有套餐的信息
+    
+    重要技术提示：
+    - 每个套餐的data-e2e属性都是以"payment-pop-item"开头的，你可以通过这个属性精确定位套餐元素
+    - 优先查找所有data-e2e属性以"payment-pop-item"开头的元素进行点击
+    
+    注意：
+    - 套餐选项通常是可点击的区域，包含价格信息
+    - 每次点击套餐后，支付按钮的价格会更新
+    - 请确保覆盖所有可见的套餐选项
+    `;
+
     console.log("开始执行agent任务:", INSTRUCTION);
     const result = await agent.execute({
       instruction: INSTRUCTION,
-      maxSteps: 5,
+      maxSteps: 10, // 增加步数以完成所有套餐的点击
     });
 
     console.log("****result:", result);
