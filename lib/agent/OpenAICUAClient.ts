@@ -55,6 +55,7 @@ export class OpenAICUAClient extends AgentClient {
     // Store client options for reference
     this.clientOptions = {
       apiKey: this.apiKey,
+      baseURL: this.baseURL,
     };
 
     // Initialize the OpenAI client
