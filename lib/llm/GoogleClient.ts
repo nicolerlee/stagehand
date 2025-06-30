@@ -83,6 +83,11 @@ export class GoogleClient extends LLMClient {
       clientOptions.apiKey = loadApiKeyFromEnv("google_legacy", logger);
     }
     this.clientOptions = clientOptions;
+
+    // 设置代理以解决网络连接问题
+    // 参考: https://github.com/google-gemini/deprecated-generative-ai-js/issues/29#issuecomment-1866246513
+    this.setupProxy(logger);
+
     this.client = new GoogleGenAI({ apiKey: clientOptions.apiKey });
     this.cache = cache;
     this.enableCaching = enableCaching;
@@ -91,6 +96,50 @@ export class GoogleClient extends LLMClient {
     // Determine vision capability based on model name (adjust as needed)
     this.hasVision =
       modelName.includes("vision") || modelName.includes("gemini-1.5"); // Example logic
+  }
+
+  // 设置代理以解决网络连接问题
+  private setupProxy(logger: (message: LogLine) => void): void {
+    // 根据常见的代理配置，尝试设置代理
+    const PROXY_URLS = [
+      "http://127.0.0.1:1087", // V2Ray HTTP 代理端口
+      "http://127.0.0.1:7890", // Clash 默认端口
+      "http://127.0.0.1:8080", // 通用代理端口
+    ];
+
+    let proxySet = false;
+    for (const proxyUrl of PROXY_URLS) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { setGlobalDispatcher, ProxyAgent } = require("undici");
+        const dispatcher = new ProxyAgent({ uri: proxyUrl });
+        setGlobalDispatcher(dispatcher);
+        logger({
+          category: "google",
+          message: `Proxy set successfully: ${proxyUrl}`,
+          level: 1,
+        });
+        proxySet = true;
+        break;
+      } catch (proxyError) {
+        logger({
+          category: "google",
+          message: `Failed to set proxy ${proxyUrl}: ${proxyError instanceof Error ? proxyError.message : String(proxyError)}`,
+          level: 2,
+        });
+      }
+    }
+
+    if (!proxySet) {
+      logger({
+        category: "google",
+        message: "No proxy set, trying environment variables",
+        level: 1,
+      });
+      // 尝试环境变量方式
+      process.env.https_proxy = "http://127.0.0.1:1087";
+      process.env.http_proxy = "http://127.0.0.1:1087";
+    }
   }
 
   // Helper to convert project's ChatMessage[] to Gemini's Content[]

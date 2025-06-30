@@ -1,4 +1,5 @@
 import { Stagehand } from "@browserbasehq/stagehand";
+import { StagehandConfig } from "./stagehand.config";
 import { z } from "zod";
 
 /**
@@ -13,13 +14,10 @@ import { z } from "zod";
 
 async function example() {
   const stagehand = new Stagehand({
+    ...StagehandConfig,
     env: "LOCAL",
     verbose: 1,
     enableCaching: false,
-    modelName: "gpt-4o",
-    modelClientOptions: {
-      apiKey: process.env.USE_OPENAI_API_KEY,
-    },
   });
 
   await stagehand.init();
