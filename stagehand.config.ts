@@ -16,19 +16,19 @@ const StagehandConfig: ConstructorParams = {
   //   apiKey: process.env.GOOGLE_API_KEY,
   // },
 
-  //   LLM configuration -  claude
-  modelName: "claude-3-7-sonnet-20250219",
-  modelClientOptions: {
-    apiKey: process.env.AIHUBMIX_API_KEY,
-    baseURL: "https://aihubmix.com",
-  },
-
-  // //   LLM configuration - openai - 还没跑通
-  // modelName: "gpt-4o",
+  // //  LLM configuration -  claude
+  // modelName: "claude-3-7-sonnet-latest",
   // modelClientOptions: {
   //   apiKey: process.env.AIHUBMIX_API_KEY,
-  //   baseURL: "https://aihubmix.com/v1",
+  //   baseURL: "https://aihubmix.com",
   // },
+
+  //   LLM configuration - openai - 还没跑通
+  modelName: "gpt-4o",
+  modelClientOptions: {
+    apiKey: process.env.AIHUBMIX_API_KEY,
+    baseURL: "https://aihubmix.com/v1",
+  },
 
   // Browser configuration
   env:

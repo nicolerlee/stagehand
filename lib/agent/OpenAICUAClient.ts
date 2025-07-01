@@ -97,7 +97,9 @@ export class OpenAICUAClient extends AgentClient {
     this.reasoningItems.clear(); // Clear any previous reasoning items
 
     // Start with the initial instruction
+
     let inputItems = this.createInitialInputItems(instruction);
+    console.log("********************inputItems", inputItems);
     let previousResponseId: string | undefined = undefined;
     let totalInputTokens = 0;
     let totalOutputTokens = 0;

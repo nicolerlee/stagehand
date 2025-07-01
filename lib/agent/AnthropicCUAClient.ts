@@ -55,6 +55,7 @@ export class AnthropicCUAClient extends AgentClient {
     // Store client options for reference
     this.clientOptions = {
       apiKey: this.apiKey,
+      baseURL: this.baseURL,
     };
 
     if (this.baseURL) {
@@ -310,17 +311,32 @@ export class AnthropicCUAClient extends AgentClient {
         }
       }
 
-      // Create the assistant response message with all content blocks
+      // Create the assistant response message with cleaned content blocks
+      // Remove extra fields from tool_use blocks that are not allowed by Anthropic API
+      const cleanedContent = content.map((block) => {
+        if (block.type === "tool_use") {
+          // For tool_use blocks, only keep the required fields
+          return {
+            type: block.type,
+            id: block.id,
+            name: block.name,
+            input: block.input,
+          };
+        }
+        // For other blocks (like text), keep them as is
+        return block;
+      });
+
       const assistantMessage: AnthropicMessage = {
         role: "assistant",
-        content: content as unknown as AnthropicContentBlock[],
+        content: cleanedContent as unknown as AnthropicContentBlock[],
       };
 
       // Keep track of the conversation history by preserving all previous messages
       // and adding new messages at the end
       const nextInputItems: ResponseInputItem[] = [...inputItems];
 
-      // Add the assistant message with tool_use blocks to the history
+      // Add the assistant message with cleaned tool_use blocks to the history
       nextInputItems.push(assistantMessage);
 
       // Generate tool results and add them as a user message
