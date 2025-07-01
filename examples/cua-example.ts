@@ -9,6 +9,9 @@
 import { Stagehand } from "@browserbasehq/stagehand";
 import StagehandConfig from "@/stagehand.config";
 import chalk from "chalk";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 async function main() {
   console.log(
@@ -26,14 +29,15 @@ async function main() {
 
     // Create a computer use agent
     const agent = stagehand.agent({
-      provider: "openai",
+      provider: "openai", //openai
       // For Anthropic, use claude-sonnet-4-20250514 or claude-3-7-sonnet-latest
-      model: "computer-use-preview",
+      model: "computer-use-preview", //computer-use-preview
       instructions: `You are a helpful assistant that can use a web browser.
       You are currently on the following page: ${page.url()}.
       Do not ask follow up questions, the user will trust your judgement.`,
       options: {
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.AIHUBMIX_API_KEY,
+        baseURL: "https://aihubmix.com/v1",
       },
     });
 

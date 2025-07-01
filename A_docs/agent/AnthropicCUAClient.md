@@ -561,6 +561,281 @@ const usage = {
 - **动作执行时间** - actionHandler处理时间
 - **总执行时间** - 完整任务的端到端时间
 
+## 🔄 convertToolUseToAction 深度解析
+
+### **核心功能：格式转换适配器**
+
+`convertToolUseToAction`是AnthropicCUAClient中的一个**核心转换方法**，位于第672行，它承担着将Anthropic AI返回的`tool_use`格式转换为Stagehand框架内部使用的`AgentAction`格式的关键任务。
+
+### **为什么需要这个转换？**
+
+```mermaid
+graph TD
+    A["Anthropic AI响应"] --> B["tool_use格式"]
+    B --> C["convertToolUseToAction()"]
+    C --> D["AgentAction格式"]
+    D --> E["actionHandler执行"]
+
+    subgraph "Anthropic格式"
+        F["coordinate: [x, y]"]
+        G["action: 'left_click'"]
+        H["name: 'computer'"]
+    end
+
+    subgraph "Stagehand格式"
+        I["x: number, y: number"]
+        J["type: 'click'"]
+        K["button: 'left'"]
+    end
+
+    B --> F
+    B --> G
+    B --> H
+
+    D --> I
+    D --> J
+    D --> K
+```
+
+### **实际转换示例**
+
+基于您提供的h5小说测试案例日志，我们可以看到真实的转换过程：
+
+#### **输入：Anthropic tool_use格式**
+
+```json
+{
+  "type": "tool_use",
+  "text": "",
+  "id": "toolu_bdrk_0164KLda7ryX1apKExWVhtxa",
+  "name": "computer",
+  "input": {
+    "action": "left_click", // ← Anthropic特定格式
+    "coordinate": [394, 533] // ← 数组格式坐标
+  }
+}
+```
+
+#### **输出：Stagehand AgentAction格式**
+
+```typescript
+{
+  type: "click",                      // ← 标准化类型
+  x: 394,                            // ← 分离的x坐标
+  y: 533,                            // ← 分离的y坐标
+  button: "left",                    // ← 明确的按钮类型
+  action: "left_click",              // ← 保留原始动作
+  coordinate: [394, 533]             // ← 保留原始坐标
+}
+```
+
+### **支持的转换类型详解**
+
+#### **1. 点击操作转换**
+
+```typescript
+case "left_click":
+  // 灵活处理Anthropic的坐标格式
+  const coordinates = input.coordinate as number[] | undefined;
+  const x = coordinates ? coordinates[0] : (input.x as number) || 0;
+  const y = coordinates ? coordinates[1] : (input.y as number) || 0;
+
+  return {
+    type: "click",              // 统一为click类型
+    x: x,                      // 提取x坐标
+    y: y,                      // 提取y坐标
+    button: "left",            // 明确按钮类型
+    ...input,                  // 保留其他属性
+  };
+```
+
+**从日志中可以看到转换效果**：
+
+```
+DEBUG: Found tool_use block: {"type":"tool_use","action":"left_click","coordinate":[394,533]}
+DEBUG: Created action from tool_use: computer, action: click
+INFO: Executing action: click
+```
+
+#### **2. 滚动操作转换**
+
+```typescript
+case "scroll":
+  // 处理Anthropic的方向性滚动语义
+  if (input.scroll_direction) {
+    const direction = input.scroll_direction as string;
+    if (direction === "down") {
+      scroll_y = scrollAmount * scrollMultiplier;      // 向下滚动
+    } else if (direction === "up") {
+      scroll_y = -scrollAmount * scrollMultiplier;     // 向上滚动
+    }
+    // ... 其他方向处理
+  }
+```
+
+#### **3. 智能按键映射**
+
+```typescript
+case "key":
+  let mappedKey = text;
+  // 智能映射常见按键别名
+  if (text === "Return" || text === "return" || text === "Enter") {
+    mappedKey = "Enter";                               // 统一按键名称
+  } else if (text === "Tab" || text === "tab") {
+    mappedKey = "Tab";
+  }
+  // ... 更多按键映射
+```
+
+### **方法签名和返回值**
+
+```typescript
+private convertToolUseToAction(item: ToolUseItem): AgentAction | null
+```
+
+**参数**：
+
+- `item: ToolUseItem` - Anthropic返回的工具使用项
+
+**返回值**：
+
+- `AgentAction | null` - 转换成功返回标准动作，失败返回null
+
+### **关键特性分析**
+
+#### **1. 多格式坐标兼容**
+
+```typescript
+// 智能处理不同的坐标表示方式
+const coordinates = input.coordinate as number[] | undefined;
+const x = coordinates ? coordinates[0] : (input.x as number) || 0;
+const y = coordinates ? coordinates[1] : (input.y as number) || 0;
+```
+
+#### **2. 动作类型标准化映射表**
+
+| Anthropic输入        | 转换输出                   | 特殊处理          |
+| -------------------- | -------------------------- | ----------------- |
+| `left_click`         | `click` + `button: "left"` | 坐标数组→分离x,y  |
+| `double_click`       | `double_click`             | 保持原样          |
+| `scroll + direction` | `scroll + scroll_x/y`      | 方向语义→像素偏移 |
+| `key + text`         | `key + mappedText`         | 按键别名映射      |
+| `type`               | `type`                     | 文本输入          |
+| `move`               | `move`                     | 鼠标移动          |
+| `drag`               | `drag`                     | 拖拽路径构建      |
+
+#### **3. 容错处理机制**
+
+```typescript
+try {
+  // 核心转换逻辑
+  return convertedAction;
+} catch (error) {
+  console.error("Error converting tool use to action:", error);
+  return null; // 优雅降级，不崩溃
+}
+```
+
+### **在执行流程中的关键作用**
+
+从实际执行日志可以看到方法的工作流程：
+
+```typescript
+// executeStep方法中的调用
+for (const block of content) {
+  if (block.type === "tool_use") {
+    const toolUseItem = block as ToolUseItem;
+
+    // 🎯 关键转换步骤
+    const action = this.convertToolUseToAction(toolUseItem);
+
+    if (action) {
+      logger({
+        message: `Created action from tool_use: ${toolUseItem.name}, action: ${action.type}`,
+        level: 2,
+      });
+      stepActions.push(action); // 添加到执行队列
+    }
+  }
+}
+```
+
+**执行时序**：
+
+1. AI返回tool_use块
+2. `convertToolUseToAction`进行格式转换
+3. 转换后的action加入执行队列
+4. actionHandler执行标准化动作
+
+### **实际案例：h5小说测试**
+
+基于您的测试日志，我们可以看到4次成功的转换：
+
+```typescript
+// 测试结果显示的转换成果
+actions: [
+  { type: "screenshot", action: "screenshot" },
+  {
+    type: "click", // ← 转换后的标准格式
+    x: 394,
+    y: 413, // ← 提取的坐标
+    button: "left", // ← 明确的按钮类型
+    action: "left_click", // ← 保留原始信息
+    coordinate: [394, 413], // ← 保留原始坐标
+  },
+  { type: "click", x: 514, y: 413, button: "left" }, // 季卡会员
+  { type: "click", x: 635, y: 413, button: "left" }, // 年卡会员
+  { type: "click", x: 394, y: 533, button: "left" }, // 7590币选项
+];
+```
+
+### **设计意义和架构价值**
+
+#### **1. 解耦AI厂商差异**
+
+- 不同AI厂商返回格式各异
+- 统一转换为Stagehand内部标准
+- 便于支持多个AI厂商的CUA功能
+
+#### **2. 简化下游处理**
+
+- actionHandler只需处理统一格式
+- 不需要了解各AI厂商的具体格式差异
+- 提高代码复用性和维护性
+
+#### **3. 扩展性设计**
+
+- 新增AI厂商只需实现对应转换逻辑
+- 核心执行引擎保持不变
+- 便于功能扩展和维护
+
+### **性能和可靠性**
+
+#### **转换效率**
+
+- 轻量级格式转换，耗时极少
+- 支持批量转换多个tool_use项
+- 内存占用微小
+
+#### **错误恢复**
+
+- 转换失败返回null而不是异常
+- 详细的错误日志记录
+- 不影响其他动作的执行
+
+### **总结**
+
+`convertToolUseToAction`是AnthropicCUAClient的**核心适配器方法**，它：
+
+1. **桥接AI模型与执行引擎** - 将AI决策转换为可执行动作
+2. **标准化数据格式** - 统一不同AI厂商的输出格式
+3. **智能映射转换** - 处理坐标、按键、动作类型等差异
+4. **错误容错处理** - 确保转换过程的稳定性
+
+这个方法是实现Stagehand**双引擎架构**的关键组件，让同一套actionHandler可以无差别地处理来自OpenAI和Anthropic两个不同AI厂商的Computer Use指令！
+
+---
+
 ## 集成和使用
 
 ### 基本使用
