@@ -47,6 +47,7 @@ export interface TreeResult {
 }
 
 export type DOMNode = {
+  nodeId?: number;
   backendNodeId?: number;
   nodeName?: string;
   children?: DOMNode[];
@@ -59,6 +60,7 @@ export type DOMNode = {
 export type BackendIdMaps = {
   tagNameMap: Record<number, string>;
   xpathMap: Record<number, string>;
+  dataE2eMap: Record<number, string>;
   iframeXPath?: string;
 };
 

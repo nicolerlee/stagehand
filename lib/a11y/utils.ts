@@ -80,7 +80,7 @@ export function cleanText(input: string): string {
  * @returns A string representation of the node and its descendants, with one node per line.
  */
 export function formatSimplifiedTree(
-  node: AccessibilityNode & { encodedId?: EncodedId },
+  node: AccessibilityNode & { encodedId?: EncodedId; dataE2e?: string },
   level = 0,
 ): string {
   // Compute indentation based on depth level
@@ -93,7 +93,7 @@ export function formatSimplifiedTree(
   const namePart = node.name ? `: ${cleanText(node.name)}` : "";
 
   // Build current line and recurse into child nodes
-  const currentLine = `${indent}[${idLabel}] ${node.role}${namePart}\n`;
+  const currentLine = `${indent}[${idLabel}] ${node.role}${namePart} data-e2e: ${node.dataE2e ?? ""}\n`;
   const childrenLines =
     node.children
       ?.map((c) => formatSimplifiedTree(c as typeof node, level + 1))
@@ -190,6 +190,7 @@ export async function buildBackendIdMaps(
     // 3. DFS walk: fill maps
     const tagNameMap: Record<EncodedId, string> = {};
     const xpathMap: Record<EncodedId, string> = {};
+    const dataE2eMap: Record<EncodedId, string> = {};
 
     interface StackEntry {
       node: DOMNode;
@@ -206,6 +207,21 @@ export async function buildBackendIdMaps(
       const enc = sp.encodeWithFrameId(fid, node.backendNodeId);
       if (seen.has(enc)) continue;
       seen.add(enc);
+
+      if (node.nodeType == 1) {
+        let dataE2e = "";
+        const { attributes } = await session.send("DOM.getAttributes", {
+          nodeId: node.nodeId,
+        });
+        for (let i = 0; i < attributes.length; i += 2) {
+          if (attributes[i] === "data-e2e") {
+            dataE2e = attributes[i + 1];
+          }
+        }
+        if (dataE2e) {
+          dataE2eMap[enc] = dataE2e;
+        }
+      }
 
       tagNameMap[enc] = lc(String(node.nodeName));
       xpathMap[enc] = path;
@@ -245,7 +261,7 @@ export async function buildBackendIdMaps(
       }
     }
 
-    return { tagNameMap, xpathMap };
+    return { tagNameMap, xpathMap, dataE2eMap };
   } finally {
     await sp.disableCDP(
       "DOM",
@@ -330,12 +346,13 @@ export async function buildHierarchicalTree(
   tagNameMap: Record<EncodedId, string>,
   logger?: (l: LogLine) => void,
   xpathMap?: Record<EncodedId, string>,
+  dataE2eMap?: Record<EncodedId, string>,
 ): Promise<TreeResult> {
   // EncodedId → URL (only if the backend-id is unique)
   const idToUrl: Record<EncodedId, string> = {};
 
   // nodeId (string) → mutable copy of the AX node we keep
-  const nodeMap = new Map<string, RichNode>();
+  const nodeMap = new Map<string, RichNode & { dataE2e?: string }>();
 
   // list of iframe AX nodes
   const iframeList: AccessibilityNode[] = [];
@@ -375,8 +392,10 @@ export async function buildHierarchicalTree(
     // store URL only when we have an unambiguous EncodedId
     if (url && encodedId) idToUrl[encodedId] = url;
 
+    const dataE2e = dataE2eMap?.[encodedId];
     nodeMap.set(node.nodeId, {
       encodedId,
+      dataE2e,
       role: node.role,
       nodeId: node.nodeId,
       ...(node.name && { name: node.name }),
@@ -485,10 +504,15 @@ export async function getAccessibilityTree(
   targetFrame?: Frame,
 ): Promise<TreeResult> {
   // 0. DOM helpers (maps, xpath)
-  const { tagNameMap, xpathMap } = await buildBackendIdMaps(
+  const { tagNameMap, xpathMap, dataE2eMap } = await buildBackendIdMaps(
     stagehandPage,
     targetFrame,
   );
+
+  logger({
+    message: `dataE2eMap: ${dataE2eMap}`,
+    level: 1,
+  });
 
   await stagehandPage.enableCDP("Accessibility", targetFrame);
 
@@ -551,6 +575,7 @@ export async function getAccessibilityTree(
       tagNameMap,
       logger,
       xpathMap,
+      dataE2eMap,
     );
 
     logger({
