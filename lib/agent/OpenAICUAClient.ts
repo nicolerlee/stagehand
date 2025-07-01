@@ -43,7 +43,8 @@ export class OpenAICUAClient extends AgentClient {
       (clientOptions?.apiKey as string) || process.env.OPENAI_API_KEY || "";
     this.organization =
       (clientOptions?.organization as string) || process.env.OPENAI_ORG;
-
+    this.baseURL =
+      (clientOptions?.baseURL as string) || process.env.AIHUBMIX_API_URL || "";
     // Get environment if specified
     if (
       clientOptions?.environment &&
