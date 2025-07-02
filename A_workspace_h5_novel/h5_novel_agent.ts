@@ -56,7 +56,6 @@ async function openH5NovelPage() {
     对于每个发现的套餐，执行以下操作：
     - 点击该套餐选项
     - 等待1秒钟观察变化
-    - 截图一张（命名为package_序号.png，比如package_1.png）
     - 记录套餐信息（名称、价格、支付按钮价格变化）
     
     **技术要求：**
@@ -66,7 +65,6 @@ async function openH5NovelPage() {
     
     **完成标准：**
     - 找到并点击所有存在的套餐（无论数量多少）
-    - 每个套餐都有对应的截图
     - 记录完整的套餐信息
     `;
 
@@ -74,6 +72,7 @@ async function openH5NovelPage() {
     const result = await agent.execute({
       instruction: INSTRUCTION,
       maxSteps: 10, // 足够的步数：最多6个套餐 × 4步/套餐 + 分析步骤 = 约28步
+      enableScreenshots: false,
     });
 
     console.log("****result:", result);

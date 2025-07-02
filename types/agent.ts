@@ -23,6 +23,7 @@ export interface AgentOptions {
   autoScreenshot?: boolean;
   waitBetweenActions?: number;
   context?: string;
+  enableScreenshots?: boolean;
 }
 
 export interface AgentExecuteOptions extends AgentOptions {

@@ -7,7 +7,12 @@ import {
   operatorSummarySchema,
 } from "@/types/operator";
 import { LLMParsedResponse } from "../inference";
-import { ChatMessage, LLMClient } from "../llm/LLMClient";
+import {
+  ChatMessage,
+  LLMClient,
+  ChatMessageImageContent,
+  ChatMessageTextContent,
+} from "../llm/LLMClient";
 import { buildOperatorSystemPrompt } from "../prompt";
 import { StagehandPage } from "../StagehandPage";
 import { ObserveResult } from "@/types/stagehand";
@@ -60,35 +65,40 @@ export class StagehandOperatorHandler {
           ],
         });
       } else {
-        const screenshot = await this.stagehandPage.page.screenshot({
-          type: "png",
-          fullPage: false,
-        });
+        const enableScreenshots = options.enableScreenshots !== false; // Default to true
 
-        const base64Image = screenshot.toString("base64");
+        let messageText: string;
+        const messageContent: (
+          | ChatMessageImageContent
+          | ChatMessageTextContent
+        )[] = [];
 
-        let messageText = `Here is a screenshot of the current page (URL: ${url}):`;
+        if (enableScreenshots) {
+          const screenshot = await this.stagehandPage.page.screenshot({
+            type: "png",
+            fullPage: false,
+          });
 
-        messageText = `Previous actions were: ${actions
-          .map((action) => {
-            let result: string = "";
-            if (action.type === "act") {
-              const args = action.playwrightArguments as ObserveResult;
-              result = `Performed a "${args.method}" action ${args.arguments.length > 0 ? `with arguments: ${args.arguments.map((arg) => `"${arg}"`).join(", ")}` : ""} on "${args.description}"`;
-            } else if (action.type === "extract") {
-              result = `Extracted data: ${action.extractionResult}`;
-            }
-            return `[${action.type}] ${action.reasoning}. Result: ${result}`;
-          })
-          .join("\n")}\n\n${messageText}`;
+          const base64Image = screenshot.toString("base64");
+          messageText = `Here is a screenshot of the current page (URL: ${url}):`;
 
-        this.messages.push({
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: messageText,
-            },
+          messageContent.push({
+            type: "text",
+            text: `Previous actions were: ${actions
+              .map((action) => {
+                let result: string = "";
+                if (action.type === "act") {
+                  const args = action.playwrightArguments as ObserveResult;
+                  result = `Performed a "${args.method}" action ${args.arguments.length > 0 ? `with arguments: ${args.arguments.map((arg) => `"${arg}"`).join(", ")}` : ""} on "${args.description}"`;
+                } else if (action.type === "extract") {
+                  result = `Extracted data: ${action.extractionResult}`;
+                }
+                return `[${action.type}] ${action.reasoning}. Result: ${result}`;
+              })
+              .join("\n")}\n\n${messageText}`,
+          });
+
+          messageContent.push(
             this.llmClient.type === "anthropic"
               ? {
                   type: "image",
@@ -103,7 +113,29 @@ export class StagehandOperatorHandler {
                   type: "image_url",
                   image_url: { url: `data:image/png;base64,${base64Image}` },
                 },
-          ],
+          );
+        } else {
+          messageText = `Current page URL: ${url}`;
+          messageContent.push({
+            type: "text",
+            text: `Previous actions were: ${actions
+              .map((action) => {
+                let result: string = "";
+                if (action.type === "act") {
+                  const args = action.playwrightArguments as ObserveResult;
+                  result = `Performed a "${args.method}" action ${args.arguments.length > 0 ? `with arguments: ${args.arguments.map((arg) => `"${arg}"`).join(", ")}` : ""} on "${args.description}"`;
+                } else if (action.type === "extract") {
+                  result = `Extracted data: ${action.extractionResult}`;
+                }
+                return `[${action.type}] ${action.reasoning}. Result: ${result}`;
+              })
+              .join("\n")}\n\n${messageText}`,
+          });
+        }
+
+        this.messages.push({
+          role: "user",
+          content: messageContent,
         });
       }
 
