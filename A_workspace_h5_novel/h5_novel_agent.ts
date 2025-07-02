@@ -55,7 +55,7 @@ async function openH5NovelPage() {
     动态识别并测试支付页面套餐选项（数量1-6个），完整记录信息并截图保存。
     ### **执行流程**
     #### **阶段一：套餐识别 (Identification)**
-    - 定位所有 \`data-e2e\` 属性以 \`"payment-pop-item"\` 开头的元素（例如：\`payment-pop-item-会员\`, \`payment-pop-item-预扣费\`）;
+    - 定位所有 \`data-e2e\` 属性以 \`payment-pop-item\` 开头的元素（例如：\`payment-pop-item-会员\`, \`payment-pop-item-预扣费\`）;
     - 获取匹配元素的总数，记为 \`套餐总数\`（可能是1-6个）;
     - 输入：
     \`\`\`
