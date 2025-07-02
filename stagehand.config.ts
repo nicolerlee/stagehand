@@ -30,6 +30,12 @@ const StagehandConfig: ConstructorParams = {
     baseURL: "https://aihubmix.com/v1",
   },
 
+  //   LLM configuration - DeepSeek
+  // modelName: "deepseek/deepseek-chat",
+  // modelClientOptions: {
+  //   apiKey: process.env.DEEPSEEK_API_KEY,
+  // },
+
   // Browser configuration
   env:
     process.env.BROWSERBASE_API_KEY && process.env.BROWSERBASE_PROJECT_ID
