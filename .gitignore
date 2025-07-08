@@ -19,3 +19,5 @@ eval-summary.json
 package-lock.json
 evals/deterministic/tests/BrowserContext/tmp-test.har
 lib/version.ts
+A_workspace_h5novel/chrome_user_data/
+A_workspace_h5novel/logs

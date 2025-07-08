@@ -2,9 +2,7 @@ import { Stagehand } from "../dist";
 import StagehandConfig from "../stagehand.config";
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 import * as readline from "readline";
-import { H5NovelTester } from "./test_h5novel";
 
 const url =
   "https://novetest.fun.tv/tt/xingchen/pages/readerPage/readerPage?cartoon_id=697000&num=5&coopCode=ad&popularizeId=funtv&microapp_id=aw7xho2to223zyp5&source=fix&__funweblogin__=1";
@@ -52,6 +50,19 @@ async function saveBrowserState(): Promise<void> {
     "A_workspace_h5novel",
     "chrome_user_data",
   );
+
+  // 🔥 先删除已存在的 chrome_user_data 目录，确保干净的开始
+  if (fs.existsSync(customUserDataDir)) {
+    console.log("正在删除旧的 chrome_user_data 目录...", customUserDataDir);
+    try {
+      fs.rmSync(customUserDataDir, { recursive: true, force: true });
+      console.log("✅ 旧的 chrome_user_data 目录已删除");
+      await sleep(2000);
+    } catch (error) {
+      console.log("⚠️  删除 chrome_user_data 目录失败:", error);
+      console.log("请手动删除该目录或确保没有进程在使用它");
+    }
+  }
 
   // 创建 Stagehand 实例，配置适合手动登录
   const stagehand = new Stagehand({
@@ -106,7 +117,7 @@ async function saveBrowserState(): Promise<void> {
     });
   `);
 
-  console.log("正在访问目标网站...");
+  console.log("正在加载目标网站，请稍等...");
 
   // 访问目标URL
   await page.goto(url, { waitUntil: "domcontentloaded" });
@@ -115,8 +126,7 @@ async function saveBrowserState(): Promise<void> {
 
   // 等待用户操作
   console.log("页面已加载，请在浏览器中完成登录操作");
-  console.log("登录完成后，按回车键继续...");
-  await waitForInput("完成操作后按回车键继续...");
+  await waitForInput("登录完成操作后按回车键继续...");
 
   // 创建保存目录
   const authDir = path.join(process.cwd(), "A_workspace_h5novel");
@@ -124,11 +134,11 @@ async function saveBrowserState(): Promise<void> {
     fs.mkdirSync(authDir, { recursive: true });
   }
 
-  // 直接保存完整的浏览器状态
-  const storagePath = path.join(authDir, "storage_state.json");
-  await context.storageState({ path: storagePath });
+  // // 直接保存完整的浏览器状态
+  // const storagePath = path.join(authDir, "storage_state.json");
+  // await context.storageState({ path: storagePath });
 
-  console.log("浏览器状态已保存到 A_workspace_h5novel/storage_state.json");
+  // console.log("浏览器状态已保存到 A_workspace_h5novel/storage_state.json");
 
   console.log("认证数据已保存完成");
   console.log("等待5秒后关闭浏览器...");
@@ -153,20 +163,13 @@ async function loadWithStorageState(targetUrl?: string): Promise<void> {
   const storagePath = path.join(
     process.cwd(),
     "A_workspace_h5novel",
-    "storage_state.json",
+    "chrome_user_data",
   );
   if (!fs.existsSync(storagePath)) {
     console.log(`错误: 认证状态文件不存在: ${storagePath}`);
     console.log("请先运行保存认证状态功能");
     return;
   }
-
-  // 预先读取认证状态
-  const authState = JSON.parse(fs.readFileSync(storagePath, "utf-8"));
-  console.log("***预加载认证状态***", {
-    cookiesCount: authState.cookies?.length || 0,
-    originsCount: authState.origins?.length || 0,
-  });
 
   // 🔥 关键：使用与保存时相同的用户数据目录
   const customUserDataDir = path.join(
@@ -196,7 +199,7 @@ async function loadWithStorageState(targetUrl?: string): Promise<void> {
       executablePath:
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
 
-      // Chrome启动参数优化 - 现在应该能生效了
+      // Chrome启动参数优化
       args: [
         "--disable-blink-features=AutomationControlled", // 隐藏自动化痕迹
         "--disable-web-security", // 禁用web安全策略
@@ -207,9 +210,6 @@ async function loadWithStorageState(targetUrl?: string): Promise<void> {
 
       // 权限设置
       permissions: ["midi"], // 保持原有的midi权限
-
-      // 🔥 关键：在初始化时加载 cookies
-      cookies: authState.cookies || [],
     },
   });
 
@@ -235,18 +235,15 @@ async function main(): Promise<void> {
   console.log("1. 保存浏览器认证状态 (⚠️ 请先关闭所有Chrome实例!)");
   console.log("2. 使用保存的认证状态访问网站 (Stagehand初始化时加载)");
 
-  // const choice = await waitForInput("请输入选项 (1/2): ");
+  const choice = await waitForInput("请输入选项 (1/2): ");
 
-  // if (choice === "1") {
-  //   await saveBrowserState();
-  // } else if (choice === "2") {
-  //   await loadWithStorageState();
-  // } else {
-  //   console.log("无效的选项");
-  // }
-
-  const tester = new H5NovelTester("both");
-  await tester.runTest();
+  if (choice === "1") {
+    await saveBrowserState();
+  } else if (choice === "2") {
+    await loadWithStorageState();
+  } else {
+    console.log("无效的选项");
+  }
 }
 
 // 如果这个文件是直接运行的，则执行主函数

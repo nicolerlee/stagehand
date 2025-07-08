@@ -1,12 +1,11 @@
 import { Stagehand } from "../dist";
-import { Request, Cookie } from "playwright";
+import { Request } from "playwright";
 import { Page } from "../types/page";
 import { EnhancedContext } from "../types/context";
 import * as fs from "fs";
 import * as path from "path";
 import winston from "winston";
 import StagehandConfig from "../stagehand.config";
-import * as readline from "readline";
 
 // 类型定义
 interface TestCase {
@@ -35,24 +34,8 @@ interface RequestsData {
 
 type LogMode = "both" | "file" | "console";
 
-/**
- * 辅助函数：等待用户输入
- */
-const waitForInput = (prompt: string): Promise<string> => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-};
-
 class H5NovelTester {
+  private workspace = "A_workspace_h5novel";
   private PREFIX = "https://novetest.fun.tv/tt/xingchen";
   // private PREFIX = "https://novetest.fun.tv/ks/xingchen";
   private TEST_CASE_FILE = "testcase-tt_h5-xingchennovel-testcase.json";
@@ -87,6 +70,7 @@ class H5NovelTester {
   private logMode: LogMode;
   public logger: winston.Logger;
   public fileOnlyLogger: winston.Logger;
+  private logPrefix: string;
 
   constructor(logMode: LogMode = "both") {
     this.logMode = logMode;
@@ -94,6 +78,7 @@ class H5NovelTester {
     this.testCases = this.loadTestCases();
   }
 
+  // 初始化日志系统
   public setupLogging(logMode: LogMode): void {
     /**
      * 设置日志 - 使用 Winston
@@ -106,7 +91,7 @@ class H5NovelTester {
      */
 
     // 创建logs目录（如果不存在）
-    const logsDir = path.join(process.cwd(), "A_workspace_h5novel", "logs");
+    const logsDir = path.join(process.cwd(), this.workspace, "logs");
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
     }
@@ -118,6 +103,7 @@ class H5NovelTester {
       .replace("T", "_")
       .split(".")[0];
     const logFile = path.join(logsDir, `test_h5novel_${timestamp}.log`);
+    this.logPrefix = path.join(logsDir, `test_h5novel_${timestamp}`);
 
     // 验证log_mode参数
     const validModes: LogMode[] = ["both", "file", "console"];
@@ -183,10 +169,15 @@ class H5NovelTester {
     this.logger.info(`开始测试... (日志模式: ${this.logMode})`);
   }
 
+  // 初始化测试用例
   private loadTestCases(): TestCase[] {
     /**加载测试用例*/
     try {
-      const testCaseFile = path.join(process.cwd(), this.TEST_CASE_FILE);
+      const testCaseFile = path.join(
+        process.cwd(),
+        this.workspace,
+        this.TEST_CASE_FILE,
+      );
       const data = fs.readFileSync(testCaseFile, "utf8");
       const cases: TestCase[] = JSON.parse(data);
       this.logger.info(`成功加载 ${cases.length} 个测试用例`);
@@ -195,13 +186,6 @@ class H5NovelTester {
       this.logger.error(`加载测试用例失败: ${error}`);
       return [];
     }
-  }
-
-  private buildUrl(path: string, query: string): string {
-    /**构建完整URL*/
-    const fullUrl = `${this.PREFIX}/${path}?${query}&__funweblogin__=1`;
-    this.logger.debug(`构建URL: ${fullUrl}`);
-    return fullUrl;
   }
 
   private parseRequestData(data: unknown): Record<string, unknown> {
@@ -379,6 +363,13 @@ class H5NovelTester {
       this.logger.error(`解析事件类型出错: ${error}`);
       return "unknown";
     }
+  }
+
+  private buildUrl(path: string, query: string): string {
+    /**构建完整URL*/
+    const fullUrl = `${this.PREFIX}/${path}?${query}&__funweblogin__=1`;
+    this.logger.debug(`构建URL: ${fullUrl}`);
+    return fullUrl;
   }
 
   private handleRequest = (request: Request): void => {
@@ -617,7 +608,11 @@ class H5NovelTester {
     ) => Promise<void>,
   ): Promise<void> {
     // 创建专门的用户数据目录用于保存认证状态
-    const customUserDataDir = path.join(process.cwd(), "chrome_user_data");
+    const customUserDataDir = path.join(
+      process.cwd(),
+      this.workspace,
+      "chrome_user_data",
+    );
 
     // 创建Stagehand实例 - 在初始化时加载cookies
     const stagehand = new Stagehand({
@@ -658,7 +653,7 @@ class H5NovelTester {
     const context = stagehand.context;
 
     // 设置请求监听 - 通过页面的context访问
-    // page.context().on("request", this.handleRequest);
+    page.context().on("request", this.handleRequest);
 
     // 执行测试用例
     for (const testCase of this.testCases) {
@@ -680,18 +675,26 @@ class H5NovelTester {
         pay_entrance: [],
       };
 
+      // 访问页面，并执行支付测试
+      let payTestResult = -2;
       try {
-        // 访问页面
         await page.goto(testUrl, {
           timeout: 30000,
           waitUntil: "networkidle",
         });
 
-        await PayTest(page, context, this);
+        await page.screenshot({
+          path: `${this.logPrefix}_${testCase.name}.png`,
+        });
+
+        payTestResult = await PayTest(page, context, this);
       } catch (error) {
         this.logger.error(`测试执行出错: ${error}`);
+        await page.screenshot({
+          path: `${this.logPrefix}_error_${testCase.name}.png`,
+        });
+        await page.waitForTimeout(10000);
 
-        // 即使测试出错，也导航到空白页面
         try {
           await page.goto("about:blank");
         } catch {
@@ -699,7 +702,19 @@ class H5NovelTester {
         }
       }
 
-      this.logger.info(`测试用例执行完成: ${testCase.name}`);
+      // 检查测试结果
+      if (payTestResult > 1) {
+        this.checkTestResults(testCase);
+      } else if (payTestResult === -1) {
+        this.fileOnlyLogger.error(`测试用例执行失败: payTest运行中异常`);
+        break;
+      } else if (payTestResult === 0) {
+        this.fileOnlyLogger.error(`测试用例执行失败: PayTest没有找到任何套餐`);
+        break;
+      } else {
+        this.fileOnlyLogger.error(`测试用例执行失败: payTest没有运行`);
+        break;
+      }
     }
 
     await stagehand.close();
@@ -713,48 +728,62 @@ async function PayTest(
   _context: EnhancedContext,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _tester: H5NovelTester,
-): Promise<void> {
-  const observations = await page.observe(
-    "Find all elements whose data-e2e attribute starts with 'payment-pop-item'",
-  );
+): Promise<number> {
+  try {
+    const observations = await page.observe(
+      "Find all elements whose data-e2e attribute starts with 'payment-pop-item'",
+    );
 
-  console.log(`Found ${observations.length} payment items`);
+    console.log(`Found ${observations.length} payment items`);
 
-  // 遍历所有套餐
-  for (let idx = 0; idx < observations.length; idx++) {
-    // 点击选中套餐
-    console.log(`Clicking package ${idx + 1}/${observations.length}`);
-    await page.act(observations[idx]);
-    await page.waitForTimeout(1000);
-
-    // 记录当前页面URL，用于检测是否发生跳转
-    const currentUrl = page.url();
-    console.log(`Current URL before payment: ${currentUrl}`);
-
-    // 点击以"立即支付"开头的按钮
-    await page.act('点击以"立即支付"开头的按钮');
-
-    // 等待30秒，检测页面是否跳转
-    console.log("等待10秒检测页面跳转...");
-    await page.waitForTimeout(10000);
-
-    // 检查页面是否发生跳转;
-    // 1. 如果有跳转，则返回上一页，并点击"我已支付完成"按钮；
-    // 2. 如果没有跳转，则跳出循环；
-    const newUrl = page.url();
-
-    if (newUrl !== currentUrl) {
-      console.log("页面发生跳转，返回上一页...");
-      await page.goBack();
-      await page.waitForTimeout(2000); // 等待页面加载
-      console.log(`返回后的URL: ${page.url()}`);
-
-      await page.act('点击"我已支付完成"按钮');
-      await page.waitForTimeout(30000);
-    } else {
-      console.log("页面没有发生跳转，跳出循环");
-      continue; // 跳出循环
+    if (observations.length === 0) {
+      console.log("没有找到套餐");
+      return 0;
     }
+
+    // 遍历所有套餐
+    for (let idx = 0; idx < observations.length; idx++) {
+      // 点击选中套餐
+      console.log(`Clicking package ${idx + 1}/${observations.length}`);
+      console.log(`observations[idx]: ${observations[idx]}`);
+      await page.act(observations[idx]);
+      await page.waitForTimeout(1000);
+
+      // 记录当前页面URL，用于检测是否发生跳转
+      const currentUrl = page.url();
+      console.log(`Current URL before payment: ${currentUrl}`);
+
+      // 点击以"立即支付"开头的按钮
+      await page.act('点击 data-e2e="payment-pop-buy" 的元素');
+
+      // 等待30秒，检测页面是否跳转
+      console.log("等待5秒检测页面跳转...");
+      await page.waitForTimeout(5000);
+
+      // 检查页面是否发生跳转;
+      // 1. 如果有跳转，则返回上一页，并点击"我已支付完成"按钮；
+      // 2. 如果没有跳转，则跳出循环；
+      const newUrl = page.url();
+
+      if (newUrl !== currentUrl) {
+        console.log("页面发生跳转，返回上一页...");
+        await page.goBack();
+        await page.waitForTimeout(2000); // 等待页面加载
+        console.log(`返回后的URL: ${page.url()}`);
+
+        await page.act('点击"我已支付完成"按钮');
+        await page.waitForTimeout(20000);
+      } else {
+        console.log("页面没有发生跳转，跳出循环");
+        continue; // 跳出循环
+      }
+    }
+
+    // 成功完成所有套餐测试
+    return 1;
+  } catch (error) {
+    console.error(`PayTest error: ${error}`);
+    return -1;
   }
 }
 

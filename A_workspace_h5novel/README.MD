@@ -1,3 +1,8 @@
+# how to run
+项目根目录下，运行
+pnpm exec tsx A_workspace_h5novel/test_h5novel.ts
+pnpm exec tsx A_workspace_h5novel/save_auth_state.ts
+
 # H5 Novel 认证状态管理
 
 本项目提供两种方式来管理浏览器认证状态：

@@ -1,33 +1,5 @@
 [
     {
-        "name": "[none]-[testcase_thirdChannel_nico_01]",
-        "path": "pages/readerPage/readerPage",
-        "query": "cartoon_id=697000&num=5&coopCode=ad&popularizeId=funtv&microapp_id=aw7xho2to223zyp5&source=fix",
-        "expectResult": {
-            "shareParams": {
-                "coopMain": "ad",
-                "coopClient": "ad",
-                "popularizeId": "funtv",
-                "microapp_id": "aw7xho2to223zyp5",
-                "coopCode": "ad",
-                "source": "h5"
-            },
-            "entranceParams": {
-                "coop_main": "ad",
-                "coop_client": "ad",
-                "coop_expert": "funtv",
-                "coop_appid": "aw7xho2to223zyp5",
-                "coop_code": "ad",
-                "source": "h5"
-            },
-            "promotionParams": {
-                "coop": "ad",
-                "appid": "aw7xho2to223zyp5",
-                "expert": "funtv"
-            }
-        }
-    },
-    {
         "name": "[none]-[testcase_ad_01]",
         "path": "pages/readerPage/readerPage",
         "query": "cartoon_id=697000&num=1&coopCode=ad&popularizeId=funtv&microapp_id=aw7xho2to223zyp5&source=fix&clickid=testcallbackwx01&adid=testpromotionidwx01&promotion_ad_id=220454268&promotion_code=jlgg&promotion_pt=88752&si=13023645",
@@ -59,6 +31,34 @@
                 "callback": "testcallbackwx01",
                 "promotion_thirdad_id": "testpromotionidwx01",
                 "promotion_pt": "88752"
+            },
+            "promotionParams": {
+                "coop": "ad",
+                "appid": "aw7xho2to223zyp5",
+                "expert": "funtv"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_thirdChannel_nico_01]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=697000&num=5&coopCode=ad&popularizeId=funtv&microapp_id=aw7xho2to223zyp5&source=fix",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "ad",
+                "coopClient": "ad",
+                "popularizeId": "funtv",
+                "microapp_id": "aw7xho2to223zyp5",
+                "coopCode": "ad",
+                "source": "h5"
+            },
+            "entranceParams": {
+                "coop_main": "ad",
+                "coop_client": "ad",
+                "coop_expert": "funtv",
+                "coop_appid": "aw7xho2to223zyp5",
+                "coop_code": "ad",
+                "source": "h5"
             },
             "promotionParams": {
                 "coop": "ad",
