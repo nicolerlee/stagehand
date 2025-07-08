@@ -1,4 +1,4 @@
-import { Stagehand } from "../lib";
+import { Stagehand } from "../dist";
 import StagehandConfig from "@/stagehand.config";
 import dotenv from "dotenv";
 import path from "path";

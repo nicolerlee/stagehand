@@ -102,7 +102,6 @@ export class GoogleClient extends LLMClient {
   private setupProxy(logger: (message: LogLine) => void): void {
     // 根据常见的代理配置，尝试设置代理
     const PROXY_URLS = [
-      "http://127.0.0.1:1087", // V2Ray HTTP 代理端口
       "http://127.0.0.1:7890", // Clash 默认端口
       "http://127.0.0.1:8080", // 通用代理端口
     ];

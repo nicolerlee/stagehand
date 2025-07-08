@@ -1,0 +1,5 @@
+2025-07-04T05:34:20.422Z - [32MINFO[39M - 开始测试... (日志模式: both)
+2025-07-04T05:34:20.422Z - [32MINFO[39M - 成功加载 1 个测试用例
+2025-07-04T05:34:20.422Z - [32MINFO[39M - 启动测试
+2025-07-04T05:34:20.422Z - [32MINFO[39M - 加载认证状态: 1 cookies
+***userDataDir*** /Users/nicolerli/Library/Application Support/Google/Chrome

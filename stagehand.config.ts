@@ -23,14 +23,14 @@ const StagehandConfig: ConstructorParams = {
   //   baseURL: "https://aihubmix.com",
   // },
 
-  //   LLM configuration - openai - 还没跑通
+  //   LLM configuration - openai
   modelName: "gpt-4o",
   modelClientOptions: {
     apiKey: process.env.AIHUBMIX_API_KEY,
     baseURL: "https://aihubmix.com/v1",
   },
 
-  //   LLM configuration - DeepSeek
+  // //  LLM configuration - DeepSeek
   // modelName: "deepseek/deepseek-chat",
   // modelClientOptions: {
   //   apiKey: process.env.DEEPSEEK_API_KEY,

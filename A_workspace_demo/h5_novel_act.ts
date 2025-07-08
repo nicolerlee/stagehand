@@ -49,6 +49,8 @@ async function openH5NovelPage() {
       await page.screenshot({
         path: path.join(logDir, `package_${idx + 1}.png`),
       });
+      await page.act('点击以"立即支付"开头的按钮');
+      await page.waitForTimeout(2000);
     }
 
     console.log("All packages clicked successfully!");

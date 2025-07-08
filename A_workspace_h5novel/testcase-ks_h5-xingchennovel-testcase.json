@@ -1,0 +1,306 @@
+[
+    {
+        "name": "[none]-[testcase_fun_01]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=649129&num=9&user_id=fun123&coop_main=funshion&coop_client=fun&coop_expert=fun123&coop_appid=ks662310620623427299",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "fun",
+                "popularizeId": "fun123",
+                "microapp_id": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun123",
+                "coopCode": ""
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "fun",
+                "coop_expert": "fun123",
+                "coop_appid": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun123",
+                "coop_code": ""
+            },
+            "promotionParams": {
+                "coop": "funshion",
+                "appid": "ks662310620623427299",
+                "expert": "fun123"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_fun_02_noetrance]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=621768&num=10&user_id=fun456&coop_main=funshion&coop_client=fun&coop_expert=fun456&coop_appid=ks662310620623427299",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "fun",
+                "popularizeId": "fun456",
+                "microapp_id": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun456",
+                "coopCode": ""
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "fun",
+                "coop_expert": "fun456",
+                "coop_appid": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun456",
+                "coop_code": ""
+            },
+            "promotionParams": {
+                "coop": "funshion",
+                "appid": "ks662310620623427299",
+                "expert": "fun456"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_appun_01]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=649129&num=9&user_id=appfun123&coop_main=funshion&coop_client=appfun&coop_expert=appfun123&coop_appid=ks662310620623427299",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "appfun",
+                "popularizeId": "appfun123",
+                "microapp_id": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "shareappfun123",
+                "coopCode": ""
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "appfun",
+                "coop_expert": "appfun123",
+                "coop_appid": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "shareappfun123",
+                "coop_code": ""
+            },
+            "promotionParams": {
+                "coop": "funshion",
+                "appid": "ks662310620623427299",
+                "expert": "appfun123"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_appun_02_noetrance]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=649129&num=9&user_id=appfun123&coop_main=funshion&coop_client=appfun&coop_expert=appfun123&coop_appid=ks662310620623427299",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "appfun",
+                "popularizeId": "appfun123",
+                "microapp_id": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "shareappfun123",
+                "coopCode": ""
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "appfun",
+                "coop_expert": "appfun123",
+                "coop_appid": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "shareappfun123",
+                "coop_code": ""
+            },
+            "promotionParams": {
+                "coop": "funshion",
+                "appid": "ks662310620623427299",
+                "expert": "appfun123"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_douyin2_01_mcn]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=649129&num=9&user_id=fun123&coop_main=funshion&coop_client=fun&coop_expert=fun123&coop_appid=ks662310620623427299&callback=testcallbackwx02&promotion_ad_id=220457735&promotion_code=jlgg&promotion_pt=88752&si=13023645",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "fun",
+                "popularizeId": "fun123",
+                "microapp_id": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun123",
+                "coopCode": "",
+                "si": "13023645",
+                "promotion_ad_id": "220457735",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx02",
+                "promotion_pt": "88752"
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "fun",
+                "coop_expert": "fun123",
+                "coop_appid": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun123",
+                "coop_code": "",
+                "si": "13023645",
+                "promotion_ad_id": "220457735",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx02",
+                "promotion_pt": "88752"
+            },
+            "promotionParams": {
+                "coop": "funshion",
+                "appid": "ks662310620623427299",
+                "expert": "fun123"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_douyin2_02_cps]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=621768&num=10&user_id=fun456&coop_main=funshion&coop_client=fun&coop_expert=fun456&coop_appid=ks662310620623427299&callback=testcallbackwx02&promotion_ad_id=220457735&promotion_code=jlgg&promotion_pt=88752&si=13023645",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "fun",
+                "popularizeId": "fun456",
+                "microapp_id": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun456",
+                "coopCode": "",
+                "si": "13023645",
+                "promotion_ad_id": "220457735",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx02",
+                "promotion_pt": "88752"
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "fun",
+                "coop_expert": "fun456",
+                "coop_appid": "ks662310620623427299",
+                "source": "h5",
+                "clicklocation": "sharefun456",
+                "coop_code": "",
+                "si": "13023645",
+                "promotion_ad_id": "220457735",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx02",
+                "promotion_pt": "88752"
+            },
+            "promotionParams": {
+                "coop": "funshion",
+                "appid": "ks662310620623427299",
+                "expert": "fun456"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_douyin2_03_mcn_noexpert]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=649129&num=9&coop_main=funshion&coop_client=fun&callback=testcallbackwx01&promotion_ad_id=220454268&promotion_code=jlgg&promotion_pt=88752&si=13023645",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "fun",
+                "popularizeId": "",
+                "microapp_id": "",
+                "source": "h5",
+                "clicklocation": "",
+                "coopCode": "",
+                "si": "13023645",
+                "promotion_ad_id": "220454268",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx01",
+                "promotion_pt": "88752"
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "fun",
+                "coop_expert": "",
+                "coop_appid": "",
+                "source": "h5",
+                "clicklocation": "",
+                "coop_code": "",
+                "si": "13023645",
+                "promotion_ad_id": "220454268",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx01",
+                "promotion_pt": "88752"
+            },
+            "promotionParams": {
+                "coop": "funshion"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_douyin2_04_cps_noexpert]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=621768&num=10&coop_main=funshion&coop_client=fun&callback=testcallbackwx02&promotion_ad_id=220457735&promotion_code=jlgg&promotion_pt=88752&si=13023645",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "funshion",
+                "coopClient": "fun",
+                "popularizeId": "",
+                "microapp_id": "",
+                "source": "h5",
+                "clicklocation": "",
+                "coopCode": "",
+                "si": "13023645",
+                "promotion_ad_id": "220457735",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx02",
+                "promotion_pt": "88752"
+            },
+            "entranceParams": {
+                "coop_main": "funshion",
+                "coop_client": "fun",
+                "coop_expert": "",
+                "coop_appid": "",
+                "source": "h5",
+                "clicklocation": "",
+                "coop_code": "",
+                "si": "13023645",
+                "promotion_ad_id": "220457735",
+                "promotion_code": "jlgg",
+                "callback": "testcallbackwx02",
+                "promotion_pt": "88752"
+            },
+            "promotionParams": {
+                "coop": "funshion"
+            }
+        }
+    },
+    {
+        "name": "[none]-[testcase_thirdChannel_nico_01]",
+        "path": "pages/readerPage/readerPage",
+        "query": "cartoon_id=621768&num=10&coopCode=ad&popularizeId=funtv&microapp_id=ks662310620623427299&source=fix",
+        "expectResult": {
+            "shareParams": {
+                "coopMain": "ad",
+                "coopClient": "ad",
+                "popularizeId": "funtv",
+                "microapp_id": "ks662310620623427299",
+                "coopCode": "ad",
+                "source": "h5"
+            },
+            "entranceParams": {
+                "coop_main": "ad",
+                "coop_client": "ad",
+                "coop_expert": "funtv",
+                "coop_appid": "ks662310620623427299",
+                "coop_code": "ad",
+                "source": "h5"
+            },
+            "promotionParams": {
+                "coop": "ad",
+                "appid": "ks662310620623427299",
+                "expert": "funtv"
+            }
+        }
+    }
+]
