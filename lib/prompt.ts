@@ -152,12 +152,30 @@ export function buildActObservePrompt(
   supportedActions: string[],
   variables?: Record<string, string>,
 ): string {
-  // Base instruction
-  let instruction = `Find the most relevant element to perform an action on given the following action: ${action}. 
-  Provide an action for this element such as ${supportedActions.join(", ")}, or any other playwright locator method. Remember that to users, buttons and links look the same in most cases.
-  If the action is completely unrelated to a potential action to be taken on the page, return an empty array. 
-  ONLY return one action. If multiple actions are relevant, return the most relevant one. 
-  If the user is asking to scroll to a position on the page, e.g., 'halfway' or 0.75, etc, you must return the argument formatted as the correct percentage, e.g., '50%' or '75%', etc.
+  // Check if the action contains test attributes for precise matching
+  const hasTestAttribute =
+    /data-(?:e2e|testid|test|cy|qa|automation)\s*=\s*['"]/i.test(action);
+
+  // Base instruction - modified based on whether it's a test attribute query
+  let instruction: string;
+
+  if (hasTestAttribute) {
+    // For test attributes, prioritize exact matching
+    instruction = `Find the element that EXACTLY matches the specified test attribute in the following action: ${action}. 
+    IMPORTANT: When a test attribute (such as data-e2e, data-testid, data-test, data-cy, data-qa, or data-automation) is specified, you must find the element with the EXACT matching attribute value. Do NOT find semantically similar elements or alternatives.
+    If no element with the exact test attribute exists, return an empty array.
+    Provide an action for this element such as ${supportedActions.join(", ")}, or any other playwright locator method.
+    ONLY return one action. If multiple elements have the same test attribute, return the first one found.`;
+  } else {
+    // For other actions, use semantic matching
+    instruction = `Find the most relevant element to perform an action on given the following action: ${action}. 
+    Provide an action for this element such as ${supportedActions.join(", ")}, or any other playwright locator method. Remember that to users, buttons and links look the same in most cases.
+    If the action is completely unrelated to a potential action to be taken on the page, return an empty array. 
+    ONLY return one action. If multiple actions are relevant, return the most relevant one.`;
+  }
+
+  // Add common instructions for both cases
+  instruction += ` If the user is asking to scroll to a position on the page, e.g., 'halfway' or 0.75, etc, you must return the argument formatted as the correct percentage, e.g., '50%' or '75%', etc.
   If the user is asking to scroll to the next chunk/previous chunk, choose the nextChunk/prevChunk method. No arguments are required here.
   If the action implies a key press, e.g., 'press enter', 'press a', 'press space', etc., always choose the press method with the appropriate key as argument — e.g. 'a', 'Enter', 'Space'. Do not choose a click action on an on-screen keyboard. Capitalize the first character like 'Enter', 'Tab', 'Escape' only for special keys.`;
 
